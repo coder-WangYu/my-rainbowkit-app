@@ -1,102 +1,899 @@
+/* 全局容器 */
 .container {
-  padding: 0 2rem;
-}
-
-.main {
   min-height: 100vh;
-  padding: 4rem 0;
-  flex: 1;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* 头部导航 */
+.header {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerLeft {
+  display: flex;
   align-items: center;
 }
 
-.footer {
+.menuButton {
+  background: none;
+  border: none;
+  color: #FF6B35;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.menuButton:hover {
+  background-color: rgba(255, 107, 53, 0.1);
+}
+
+.headerRight {
   display: flex;
-  flex: 1;
-  padding: 2rem 0;
-  border-top: 1px solid #eaeaea;
-  justify-content: center;
   align-items: center;
+  gap: 1rem;
 }
 
-.footer a {
+.networkIndicator {
   display: flex;
-  justify-content: center;
   align-items: center;
-  flex-grow: 1;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: #3B82F6;
 }
 
-.title a {
-  color: #0d76fc;
-  text-decoration: none;
+.networkDot {
+  width: 8px;
+  height: 8px;
+  background: #3B82F6;
+  border-radius: 50%;
 }
 
-.title a:hover,
-.title a:focus,
-.title a:active {
-  text-decoration: underline;
+.themeToggle {
+  background: none;
+  border: none;
+  color: #FF6B35;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
 }
 
-.title {
-  margin: 3rem 0;
-  line-height: 1;
-  font-size: 2.5rem;
+.themeToggle:hover {
+  background-color: rgba(255, 107, 53, 0.1);
 }
 
-.title,
-.description {
+/* 主要内容区域 */
+.main {
+  padding: 2rem;
+  padding-bottom: 6rem; /* 为底部导航留出空间 */
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* 标题区域 */
+.titleSection {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.logo {
+  margin-bottom: 1rem;
+}
+
+.mainTitle {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #FF6B35;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(255, 107, 53, 0.2);
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: #6B7280;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 指标卡片网格 */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.metricCard {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.metricIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  color: #FF6B35;
+}
+
+.metricCard:nth-child(1) .metricIcon {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
+}
+
+.metricCard:nth-child(2) .metricIcon {
+  background: rgba(147, 51, 234, 0.1);
+  color: #9333EA;
+}
+
+.metricCard:nth-child(3) .metricIcon {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22C55E;
+}
+
+.metricCard:nth-child(4) .metricIcon {
+  background: rgba(147, 51, 234, 0.1);
+  color: #9333EA;
+}
+
+.metricValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 0.5rem;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+/* 主要内容网格 */
+.contentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+/* 质押卡片 */
+.stakingCard {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.stakingCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(30px, -30px);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.cardHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.cardIcon {
+  color: #EF4444;
+}
+
+.stakedAmount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #FF6B35;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
-.description {
-  margin: 0 0 2rem;
-  line-height: 1.5;
-  font-size: 1.5rem;
+.inputGroup {
+  margin-bottom: 1.5rem;
 }
 
-.grid {
+.inputGroup label {
+  display: block;
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.amountInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.amountInput:focus {
+  outline: none;
+  border-color: #FF6B35;
+}
+
+.inputSuffix {
+  position: absolute;
+  right: 2.5rem;
+  color: #6B7280;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+/* 奖励卡片 */
+.rewardsCard {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.rewardsCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(30px, -30px);
+}
+
+.rewardsAmount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #22C55E;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.rewardsInfo {
+  background: rgba(147, 51, 234, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.infoHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #9333EA;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.infoList {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #6B7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.infoList li {
+  margin-bottom: 0.25rem;
+}
+
+/* 按钮样式 */
+.stakeButton,
+.claimButton {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(255, 107, 53, 0.2);
+}
+
+.stakeButton:hover,
+.claimButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(255, 107, 53, 0.3);
+  background: linear-gradient(135deg, #FF5722 0%, #FF7043 100%);
+}
+
+.stakeButton:active,
+.claimButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(255, 107, 53, 0.2);
+}
+
+.claimButton {
+  background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);
+  box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
+}
+
+.claimButton:hover {
+  box-shadow: 0 6px 12px rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, #16A34A 0%, #22C55E 100%);
+}
+
+.claimButton:active {
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+}
+
+/* 禁用状态样式 */
+.stakeButton:disabled,
+.claimButton:disabled {
+  background: #E5E7EB !important;
+  color: #9CA3AF !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 0.6;
+}
+
+.stakeButton:disabled:hover,
+.claimButton:disabled:hover {
+  background: #E5E7EB !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 消息提示样式 */
+.notification {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 400px;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+  background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);
+  color: white;
+}
+
+.notification.error {
+  background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
+  color: white;
+}
+
+.notificationContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.notificationIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.notificationText {
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Withdraw页面样式 */
+.withdrawCard {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.statusCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statusCard {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.statusLabel {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.statusValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #EF4444;
+}
+
+.unstakeSection,
+.withdrawSection {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.unstakeSection h2,
+.withdrawSection h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.withdrawInfo {
+  margin-bottom: 1.5rem;
+}
+
+.withdrawAmount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.amountDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #EF4444;
+}
+
+.cooldownInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #6B7280;
+  background: rgba(107, 114, 128, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+}
+
+.withdrawHint {
+  font-size: 0.875rem;
+  color: #6B7280;
+  background: rgba(107, 114, 128, 0.05);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #6B7280;
+}
+
+.unstakeButton,
+.withdrawButton {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(255, 107, 53, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  max-width: 800px;
+  gap: 0.5rem;
 }
 
-.card {
-  margin: 1rem;
-  padding: 1.5rem;
-  text-align: left;
-  color: inherit;
-  text-decoration: none;
-  border: 1px solid #eaeaea;
+.unstakeButton:hover,
+.withdrawButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(255, 107, 53, 0.3);
+  background: linear-gradient(135deg, #FF5722 0%, #FF7043 100%);
+}
+
+.unstakeButton:disabled,
+.withdrawButton:disabled {
+  background: #E5E7EB !important;
+  color: #9CA3AF !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 0.6;
+}
+
+/* Claim Rewards页面样式 */
+.claimLogo {
+  margin-bottom: 1rem;
+}
+
+.claimTitle {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #22C55E;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+}
+
+.claimContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.rewardStatsCard,
+.claimRewardsCard {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rewardStatsCard h2,
+.claimRewardsCard h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #22C55E;
+}
+
+.statsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.statIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
-  transition: color 0.15s ease, border-color 0.15s ease;
-  max-width: 350px;
+  background: rgba(34, 197, 94, 0.1);
+  color: #22C55E;
+  flex-shrink: 0;
 }
 
-.card:hover,
-.card:focus,
-.card:active {
-  color: #0d76fc;
-  border-color: #0d76fc;
+.statItem:nth-child(2) .statIcon {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
 }
 
-.card h2 {
-  margin: 0 0 1rem 0;
-  font-size: 1.2rem;
+.statItem:nth-child(3) .statIcon {
+  background: rgba(147, 51, 234, 0.1);
+  color: #9333EA;
 }
 
-.card p {
-  margin: 0;
-  font-size: 1.2rem;
-  line-height: 1.5;
+.statInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
-@media (max-width: 600px) {
-  .grid {
-    width: 100%;
-    flex-direction: column;
+.statLabel {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 0.25rem;
+}
+
+.statValue {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.claimInfo {
+  background: rgba(147, 51, 234, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.rewardsAvailable {
+  margin-bottom: 1.5rem;
+}
+
+.rewardAmount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.rewardAmount span {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.amountDisplay {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #22C55E;
+}
+
+.noRewards {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(107, 114, 128, 0.1);
+  border-radius: 12px;
+  color: #6B7280;
+  margin-bottom: 1.5rem;
+}
+
+.claimButton {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
+  margin-bottom: 1rem;
+}
+
+.claimButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, #16A34A 0%, #22C55E 100%);
+}
+
+.claimButton:disabled {
+  background: #E5E7EB !important;
+  color: #9CA3AF !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 0.6;
+}
+
+.claimHint {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #FF6B35;
+  background: rgba(255, 107, 53, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.rewardHistoryCard {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.rewardHistoryCard h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.historyPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  color: #6B7280;
+  text-align: center;
+}
+
+.historyPlaceholder svg {
+  margin-bottom: 1rem;
+  color: #9333EA;
+}
+
+.historyPlaceholder p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.historyPlaceholder p:first-of-type {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem;
+  }
+  
+  .main {
+    padding: 1rem;
+  }
+  
+  .mainTitle {
+    font-size: 2rem;
+  }
+  
+  .metricsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .stakingCard,
+  .rewardsCard {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .headerRight {
+    gap: 0.5rem;
+  }
+  
+  .networkIndicator {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Withdraw页面响应式 */
+  .statusCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .withdrawCard {
+    padding: 1rem;
+  }
+  
+  .unstakeSection,
+  .withdrawSection {
+    padding: 1rem;
+  }
+  
+  /* Claim Rewards页面响应式 */
+  .claimContent {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .rewardStatsCard,
+  .claimRewardsCard {
+    padding: 1.5rem;
+  }
+  
+  .claimTitle {
+    font-size: 2rem;
+  }
+  
+  .statItem {
+    padding: 0.75rem;
+  }
+  
+  .rewardHistoryCard {
+    padding: 1.5rem;
   }
 }
