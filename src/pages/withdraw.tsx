@@ -118,13 +118,6 @@ const Withdraw: NextPage = () => {
 
       {/* 头部导航 */}
       <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <button className={styles.menuButton}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
         <div className={styles.headerRight}>
           <ConnectButton />
         </div>
