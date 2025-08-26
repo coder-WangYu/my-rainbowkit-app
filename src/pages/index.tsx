@@ -2,7 +2,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useBalance } from 'wagmi';
 import styles from '../styles/Home.module.css';
 import Navigation from '../components/Navigation';
 
@@ -26,6 +26,11 @@ const Home: NextPage = () => {
   
   // 获取钱包连接状态
   const { isConnected, address } = useAccount();
+
+  // 获取钱包余额
+  const { data: balance } = useBalance({
+    address,
+  });
 
   // 监听钱包连接状态变化
   useEffect(() => {
@@ -185,6 +190,16 @@ const Home: NextPage = () => {
                 <span className={styles.inputSuffix}>ETH</span>
               </div>
             </div>
+            {/* 钱包余额显示 */}
+            {isLoggedIn && balance && (
+              <div className={styles.balanceInfo}>
+                <span className={styles.balanceLabel}>钱包余额：</span>
+                <span className={styles.balanceValue}>
+                  {parseFloat(balance.formatted).toFixed(4)} {balance.symbol}
+                </span>
+              </div>
+            )}
+            
             {isLoggedIn ? (
               <button 
                 className={styles.stakeButton}
