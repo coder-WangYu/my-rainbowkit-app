@@ -14,8 +14,8 @@ const Withdraw: NextPage = () => {
   const [unstakeAmount, setUnstakeAmount] = useState(0);
   
   // 模拟数据
-  const [stakedAmount, setStakedAmount] = useState(0.1); // 已质押金额
-  const [availableToWithdraw, setAvailableToWithdraw] = useState(0.1); // 可提取金额
+  const [stakedAmount, setStakedAmount] = useState(0); // 已质押金额
+  const [availableToWithdraw, setAvailableToWithdraw] = useState(0); // 可提取金额
   const [pendingWithdraw, setPendingWithdraw] = useState(0); // 待提取金额
   const [cooldownTime, setCooldownTime] = useState(20); // 冷却时间（分钟）
   

@@ -5,63 +5,125 @@ import { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import styles from '../styles/Home.module.css';
 import Navigation from '../components/Navigation';
+import { useRewardContract, useStakeContract } from '../hooks/useContract';
+import { waitForTransactionReceipt } from 'viem/actions';
+import { client } from '../hooks/useContract';
+import { parseUnits } from 'viem';
 
 const Home: NextPage = () => {
-  // 用户登录状态
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  // 质押金额状态
-  const [stakeAmount, setStakeAmount] = useState(0);
-  
-  // 奖励金额状态（模拟数据）
-  const [rewardAmount, setRewardAmount] = useState(0);
-  
-  // 质押金额状态
-  const [stakedAmount, setStakedAmount] = useState(0);
-  
+  const stakeContract = useStakeContract(); // 获取质押合约
+  const rewardContract = useRewardContract(); // 获取奖励合约
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 获取用户登录状态
+  const { isConnected, address } = useAccount(); // 获取钱包连接状态及地址
+  const [stakeAmount, setStakeAmount] = useState(0); // 用户质押金额
+  const [rewardAmount, setRewardAmount] = useState(0); // 奖励金额状态（模拟数据）
+  const [stakedAmount, setStakedAmount] = useState(0); // 用户已质押金额
+  const [totalStaked, setTotalStaked] = useState(0); // 合约总质押金额
+  const [totalRewards, setTotalRewards] = useState(0); // 合约总奖励金额
+  const { data: balance, refetch: refetchBalance } = useBalance({ // 获取钱包余额 & 更新方法
+    address
+  });
+
   // 消息提示状态
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [showMessage, setShowMessage] = useState(false);
   
-  // 获取钱包连接状态
-  const { isConnected, address } = useAccount();
+  // 获取总数据的函数
+  const fetchTotalData = async () => {
+    if (stakeContract) {
+      try {
+        // 获取总质押量
+        const totalSupply = await stakeContract.read.totalSupply();
+        setTotalStaked(Number(totalSupply) / 1e18);
+        
+        // 获取总奖励代币数量
+        const totalRewards = await rewardContract.read.balanceOf([stakeContract.address])
+        setTotalRewards(Number(totalRewards) / 1e18);
+      } catch (error) {
+        console.error("获取总数据失败:", error);
+      }
+    }
+  };
 
-  // 获取钱包余额
-  const { data: balance } = useBalance({
-    address,
-  });
-
-  // 监听钱包连接状态变化
-  useEffect(() => {
-    setIsLoggedIn(isConnected);
-  }, [isConnected]);
+  // 获取用户数据
+  const fetchUserData = async () => {
+    if (stakeContract && address && isConnected) {
+      try {
+        // 获取用户质押金额
+        const stakedAmount = await stakeContract.read.balanceOf([address]);
+        setStakedAmount(Number(stakedAmount) / 1e18);
+        
+        // 获取用户赚取的奖励
+        const earnedReward = await stakeContract.read.earned([address]);
+        setRewardAmount(Number(earnedReward) / 1e18);
+        
+      } catch (error) {
+        console.error("获取用户数据失败:", error);
+      }
+    }
+  };
 
   // 质押处理函数
   const handleStake = async () => {
-    if (stakeAmount <= 0) {
-      showNotification('请输入有效的质押金额', 'error');
+    if(!stakeContract) {
+      showNotification('请先连接钱包', 'error');
+      return;
+    }
+
+    if(parseFloat(stakeAmount.toString()) > parseFloat(balance!.formatted)) {
+      showNotification('质押金额大于钱包余额', 'error');
       return;
     }
 
     try {
-      // 模拟质押交易
-      await new Promise(resolve => setTimeout(resolve, 2000)); // 模拟网络延迟
-      
-      // 模拟成功概率（90%成功率）
-      const isSuccess = Math.random() > 0.1;
-      
-      if (isSuccess) {
-        // 质押成功
-        setStakedAmount(prev => prev + stakeAmount);
-        setStakeAmount(0); // 清空输入框
-        showNotification(`成功质押 ${stakeAmount} ETH！`, 'success');
+      const tx = await stakeContract.write.stake([], 
+        { value: parseUnits(stakeAmount.toString(), 18) }
+      )
+      const result = await waitForTransactionReceipt(client, { hash: tx });
+
+      if(result.status === "success") {
+        setStakeAmount(0);
+        showNotification('质押成功', 'success');
+        
+        // 等待一下让区块链状态更新，然后重新获取所有数据
+        setTimeout(async () => {
+          await refetchBalance();
+        }, 2000);
       } else {
-        // 质押失败
-        showNotification('质押失败，请重试', 'error');
+        showNotification('质押失败', 'error');
       }
     } catch (error) {
       showNotification('质押过程中发生错误', 'error');
+    }
+  };
+
+  // 领取奖励处理函数
+  const handleClaimReward = async () => {
+    if (!stakeContract) {
+      showNotification('请先连接钱包', 'error');
+      return;
+    }
+
+    try {      
+      const tx = await stakeContract.write.claimReward();
+      const result = await waitForTransactionReceipt(client, { hash: tx });
+
+      if (result.status === "success") {
+        showNotification('奖励领取成功', 'success');
+        
+        // 更新奖励金额
+        setTimeout(async () => {
+          if (stakeContract && address) {
+            const newEarnedReward = await stakeContract.read.earned([address]);
+            setRewardAmount(Number(newEarnedReward) / 1e18);
+          }
+        }, 2000);
+      } else {
+        showNotification('奖励领取失败', 'error');
+      }
+    } catch (error) {
+      showNotification('领取奖励过程中发生错误', 'error');
     }
   };
 
@@ -76,6 +138,19 @@ const Home: NextPage = () => {
       setShowMessage(false);
     }, 3000);
   };
+
+  // 监听钱包连接状态变化
+  useEffect(() => {
+    setIsLoggedIn(isConnected);
+    
+    if (isConnected) {
+      fetchUserData();
+    }
+  }, [isConnected, stakeContract, address]);
+
+  useEffect(() => {
+    fetchTotalData()
+  }, [rewardContract])
 
   return (
     <div className={styles.container}>
@@ -124,7 +199,7 @@ const Home: NextPage = () => {
                 <path d="M21 7V13H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <div className={styles.metricValue}>0.00 ETH</div>
+            <div className={styles.metricValue}>{totalStaked.toFixed(4)} ETH</div>
             <div className={styles.metricLabel}>总质押量</div>
           </div>
 
@@ -147,7 +222,7 @@ const Home: NextPage = () => {
                 <path d="M20 12V10H22V12H20ZM22 16V14H20V16H22ZM6 12C6 15.314 8.686 18 12 18C15.314 18 18 15.314 18 12C18 8.686 15.314 6 12 6C8.686 6 6 8.686 6 12ZM12 8C13.1046 8 14 8.89543 14 10C14 11.1046 13.1046 12 12 12C10.8954 12 10 11.1046 10 10C10 8.89543 10.8954 8 12 8Z" fill="currentColor"/>
               </svg>
             </div>
-            <div className={styles.metricValue}>0.00 WY</div>
+            <div className={styles.metricValue}>{totalRewards.toFixed(4)} WY</div>
             <div className={styles.metricLabel}>总奖励</div>
           </div>
 
@@ -181,7 +256,8 @@ const Home: NextPage = () => {
                 <input 
                   type="number" 
                   placeholder="0.0" 
-                  min="0" 
+                  min="0"
+                  max={balance?.formatted ? parseFloat(balance.formatted).toFixed(4) : 0}
                   step="0.0001" 
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(parseFloat(e.target.value) || 0)}
@@ -199,7 +275,6 @@ const Home: NextPage = () => {
                 </span>
               </div>
             )}
-            
             {isLoggedIn ? (
               <button 
                 className={styles.stakeButton}
@@ -244,6 +319,7 @@ const Home: NextPage = () => {
               <button 
                 className={styles.claimButton}
                 disabled={rewardAmount <= 0}
+                onClick={handleClaimReward}
               >
                 领取奖励
               </button>
