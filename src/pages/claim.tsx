@@ -2,36 +2,52 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useBalance } from 'wagmi';
 import styles from '../styles/Home.module.css';
 import Navigation from '../components/Navigation';
 import Loading from '../components/Loading';
+import { client, useStakeContract } from '../hooks/useContract';
+import { waitForTransactionReceipt } from 'viem/actions';
 
 const ClaimRewards: NextPage = () => {
-  // 用户登录状态
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  // 模拟数据
+  const stakeContract = useStakeContract(); // 获取质押合约
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 用户登录状态
+  const [rewardRate, setRewardRate] = useState(0) // 奖励率
   const [pendingRewards, setPendingRewards] = useState(0); // 待领取奖励
   const [stakedAmount, setStakedAmount] = useState(0); // 质押金额
-  const [lastUpdate, setLastUpdate] = useState('18:10:06'); // 最后更新时间
+  const { isConnected, address } = useAccount(); // 获取钱包连接状态
+  const [isLoading, setIsLoading] = useState(false); // Loading 状态
+  const { data: balance, refetch: refetchBalance } = useBalance({ // 获取钱包余额 & 更新方法
+    address
+  });
   
   // 消息提示状态
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [showMessage, setShowMessage] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Loading 状态
-  
-  // 获取钱包连接状态
-  const { isConnected, address } = useAccount();
 
-  // 监听钱包连接状态变化
-  useEffect(() => {
-    setIsLoggedIn(isConnected);
-  }, [isConnected]);
+  const fetchUserData = async () => {
+    if (stakeContract && address && isConnected) {
+      try {
+        const stakedAmount = await stakeContract.read.balanceOf([address]);
+        setStakedAmount(Number(stakedAmount) / 1e18);
+        const pendingRewards = await stakeContract.read.earned([address]);
+        setPendingRewards(Number(pendingRewards) / 1e18);
+        const rewardRate = await stakeContract.read.rewardRate();
+        setRewardRate(Number(rewardRate) / 1e18);
+      } catch (error) {
+        console.error("获取用户数据失败:", error);
+      }
+    }
+  };
 
   // 领取奖励处理函数
   const handleClaimRewards = async () => {
+    if (!stakeContract) {
+      showNotification('请先连接钱包', 'error');
+      return;
+    }
+
     if (pendingRewards <= 0) {
       showNotification('没有可领取的奖励', 'error');
       return;
@@ -39,18 +55,19 @@ const ClaimRewards: NextPage = () => {
 
     try {
       setIsLoading(true); // 开始 loading
+      const tx = await stakeContract.write.claimReward();
+      const result = await waitForTransactionReceipt(client, { hash: tx });
       
-      // 模拟领取奖励交易
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // 模拟成功概率（95%成功率）
-      const isSuccess = Math.random() > 0.05;
-      
-      if (isSuccess) {
+      if (result.status === "success") {
         // 领取成功
         const claimedAmount = pendingRewards;
         setPendingRewards(0);
         showNotification(`成功领取 ${claimedAmount.toFixed(4)} WY 奖励！`, 'success');
+
+        // 等待一下让区块链状态更新，然后重新获取所有数据
+        setTimeout(async () => {
+          await refetchBalance();
+        }, 2000);
       } else {
         showNotification('领取奖励失败，请重试', 'error');
       }
@@ -73,6 +90,16 @@ const ClaimRewards: NextPage = () => {
     }, 3000);
   };
 
+  // 监听钱包连接状态变化
+  useEffect(() => {
+    setIsLoggedIn(isConnected);
+  }, [isConnected]);
+
+  // 获取用户信息
+  useEffect(() => {
+    fetchUserData()
+  }, [stakeContract])
+
   return (
     <div className={styles.container}>
       <Head>
@@ -82,7 +109,7 @@ const ClaimRewards: NextPage = () => {
       </Head>
 
       {/* 全局 Loading 蒙版 */}
-      <Loading isLoading={isLoading} message="领取奖励中，请稍候..." />
+      <Loading isLoading={isLoading} />
 
       {/* 头部导航 */}
       <header className={styles.header}>
@@ -145,17 +172,16 @@ const ClaimRewards: NextPage = () => {
                   <span className={styles.statValue}>{stakedAmount.toFixed(4)} ETH</span>
                 </div>
               </div>
-              
+
               <div className={styles.statItem}>
                 <div className={styles.statIcon}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                    <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M20 12V10H22V12H20ZM22 16V14H20V16H22ZM6 12C6 15.314 8.686 18 12 18C15.314 18 18 15.314 18 12C18 8.686 15.314 6 12 6C8.686 6 6 8.686 6 12ZM12 8C13.1046 8 14 8.89543 14 10C14 11.1046 13.1046 12 12 12C10.8954 12 10 11.1046 10 10C10 8.89543 10.8954 8 12 8Z" fill="currentColor"/>
                   </svg>
                 </div>
                 <div className={styles.statInfo}>
-                  <span className={styles.statLabel}>最后更新</span>
-                  <span className={styles.statValue}>{lastUpdate}</span>
+                  <span className={styles.statLabel}>奖励率(s)</span>
+                  <span className={styles.statValue}>{rewardRate.toFixed(4)} WY</span>
                 </div>
               </div>
             </div>
@@ -220,19 +246,6 @@ const ClaimRewards: NextPage = () => {
                 🔥 开始质押ETH赚取WY奖励！ 🔥
               </div>
             )}
-          </div>
-        </div>
-
-        {/* 奖励历史 */}
-        <div className={styles.rewardHistoryCard}>
-          <h2>奖励历史</h2>
-          <div className={styles.historyPlaceholder}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-              <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-            <p>奖励历史将在此显示</p>
-            <p>跟踪您过去的领取记录和奖励</p>
           </div>
         </div>
       </main>
