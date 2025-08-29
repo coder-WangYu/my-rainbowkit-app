@@ -9,6 +9,7 @@ import { useRewardContract, useStakeContract } from '../hooks/useContract';
 import { waitForTransactionReceipt } from 'viem/actions';
 import { client } from '../hooks/useContract';
 import { parseUnits } from 'viem';
+import Loading from '../components/Loading';
 
 const Home: NextPage = () => {
   const stakeContract = useStakeContract(); // 获取质押合约
@@ -28,6 +29,7 @@ const Home: NextPage = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [showMessage, setShowMessage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // 全局 loading 状态
   
   // 获取总数据的函数
   const fetchTotalData = async () => {
@@ -77,6 +79,8 @@ const Home: NextPage = () => {
     }
 
     try {
+      setIsLoading(true); // 开始 loading
+      
       const tx = await stakeContract.write.stake([], 
         { value: parseUnits(stakeAmount.toString(), 18) }
       )
@@ -95,6 +99,8 @@ const Home: NextPage = () => {
       }
     } catch (error) {
       showNotification('质押过程中发生错误', 'error');
+    } finally {
+      setIsLoading(false); // 结束 loading
     }
   };
 
@@ -105,7 +111,9 @@ const Home: NextPage = () => {
       return;
     }
 
-    try {      
+    try {
+      setIsLoading(true); // 开始 loading
+      
       const tx = await stakeContract.write.claimReward();
       const result = await waitForTransactionReceipt(client, { hash: tx });
 
@@ -124,6 +132,8 @@ const Home: NextPage = () => {
       }
     } catch (error) {
       showNotification('领取奖励过程中发生错误', 'error');
+    } finally {
+      setIsLoading(false); // 结束 loading
     }
   };
 
@@ -159,6 +169,9 @@ const Home: NextPage = () => {
         <meta name="description" content="质押ETH赚取WY代币" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      {/* 全局 Loading 蒙版 */}
+      <Loading isLoading={isLoading} />
 
       {/* 头部导航 */}
       <header className={styles.header}>

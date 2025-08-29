@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import styles from '../styles/Home.module.css';
 import Navigation from '../components/Navigation';
+import Loading from '../components/Loading';
 
 const ClaimRewards: NextPage = () => {
   // 用户登录状态
@@ -19,6 +20,7 @@ const ClaimRewards: NextPage = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [showMessage, setShowMessage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Loading 状态
   
   // 获取钱包连接状态
   const { isConnected, address } = useAccount();
@@ -36,6 +38,8 @@ const ClaimRewards: NextPage = () => {
     }
 
     try {
+      setIsLoading(true); // 开始 loading
+      
       // 模拟领取奖励交易
       await new Promise(resolve => setTimeout(resolve, 2000));
       
@@ -52,6 +56,8 @@ const ClaimRewards: NextPage = () => {
       }
     } catch (error) {
       showNotification('领取奖励过程中发生错误', 'error');
+    } finally {
+      setIsLoading(false); // 结束 loading
     }
   };
 
@@ -74,6 +80,9 @@ const ClaimRewards: NextPage = () => {
         <meta name="description" content="领取您的WY代币奖励" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      {/* 全局 Loading 蒙版 */}
+      <Loading isLoading={isLoading} message="领取奖励中，请稍候..." />
 
       {/* 头部导航 */}
       <header className={styles.header}>
